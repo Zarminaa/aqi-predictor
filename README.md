@@ -26,3 +26,5 @@ An end-to-end MLOps project that predicts Air Quality Index (AQI) for the next 3
 - SHAP
 
 ## Project Structure
+<img width="215" height="271" alt="image" src="https://github.com/user-attachments/assets/fa4fa508-f89b-4679-86c4-5fd08b35bae3" />
+
