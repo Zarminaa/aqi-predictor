@@ -1,0 +1,69 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# =========================
+# Virtual Environment
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+!.env.example
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Pytest
+# =========================
+.pytest_cache/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# macOS / Windows
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Artifacts
+# =========================
+artifacts/
+*.pkl
+*.joblib
+*.h5
+*.keras
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Data (optional)
+# =========================
+# Ignore large datasets but keep folder structure
+data/raw/*
+data/interim/*
+data/processed/*
+
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
