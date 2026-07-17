@@ -34,7 +34,7 @@ class WeatherClient:
                 "cloud_cover"
             ]),
 
-            "timezone": "Asia/Karachi",
+            "timezone": "UTC",
 
             "temperature_unit": "celsius",
             "wind_speed_unit": "kmh",
