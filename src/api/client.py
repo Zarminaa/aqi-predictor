@@ -7,31 +7,25 @@ load_dotenv()
 
 API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-BASE_URL = "https://api.openweathermap.org/data/2.5"
-
 
 class APIClient:
-    """Reusable client for making requests to OpenWeather."""
 
-    def __init__(self):
+    def __init__(self, base_url):
         if API_KEY is None:
             raise ValueError(
                 "OPENWEATHER_API_KEY not found in .env"
             )
-
+        self.base_url = base_url
         self.api_key = API_KEY
 
-    def get(self, endpoint, params=None):
-        """
-        Send a GET request to the OpenWeather API.
-        """
+    def get(self, endpoint="", params=None):
 
         if params is None:
             params = {}
 
         params["appid"] = self.api_key
 
-        url = f"{BASE_URL}/{endpoint}"
+        url = f"{self.base_url}/{endpoint}"
 
         response = requests.get(
             url,
@@ -42,5 +36,3 @@ class APIClient:
         response.raise_for_status()
 
         return response.json()
-    
-
