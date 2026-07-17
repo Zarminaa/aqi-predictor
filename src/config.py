@@ -18,4 +18,3 @@ END_DATE = datetime(
 )
 
 POLLUTION_OUTPUT_FILE = "data/raw/pollution.csv"
-WEATHER_OUTPUT_FILE = "data/raw/weather.csv"
