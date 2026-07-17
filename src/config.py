@@ -5,7 +5,7 @@ LON = 74.3587
 
 START_DATE = datetime(
     2020,
-    12,
+    7,
     1,
     tzinfo=timezone.utc,
 )
@@ -13,8 +13,9 @@ START_DATE = datetime(
 END_DATE = datetime(
     2026,
     7,
-    15,
+    2,
     tzinfo=timezone.utc,
 )
 
-OUTPUT_FILE = "data/raw/pollution.csv"
+POLLUTION_OUTPUT_FILE = "data/raw/pollution.csv"
+WEATHER_OUTPUT_FILE = "data/raw/weather.csv"

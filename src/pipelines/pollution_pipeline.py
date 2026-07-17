@@ -8,7 +8,7 @@ from src.config import (
     LON,
     START_DATE,
     END_DATE,
-    OUTPUT_FILE,
+    POLLUTION_OUTPUT_FILE,
 )
 
 
@@ -95,11 +95,11 @@ def save_csv(records):
 
     # Save
     df.to_csv(
-        OUTPUT_FILE,
+        POLLUTION_OUTPUT_FILE,
         index=False,
     )
 
-    print(f"Saved {len(df)} unique records to '{OUTPUT_FILE}'.")
+    print(f"Saved {len(df)} unique records to '{POLLUTION_OUTPUT_FILE}'.")
 
 
 def run_pollution_pipeline():
@@ -159,7 +159,7 @@ def run_pollution_pipeline():
     print("=" * 60)
     print(f"Total Records Collected : {len(all_records)}")
     print(f"Failed Windows          : {len(failed_windows)}")
-    print(f"Output File             : {OUTPUT_FILE}")
+    print(f"Output File             : {POLLUTION_OUTPUT_FILE}")
 
     if failed_windows:
         print("\nFailed Windows:")
