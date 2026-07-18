@@ -64,4 +64,6 @@ data/raw/*
 data/interim/*
 data/processed/*
 
-src/eda/plots/
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
