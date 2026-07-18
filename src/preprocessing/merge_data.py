@@ -19,6 +19,6 @@ print(merged.head())
 print("\nShape:", merged.shape)
 
 # Save merged dataset
-merged.to_csv("data/processed/lahore_merged.csv", index=False)
+merged.to_csv("data/interim/lahore_merged.csv", index=False)
 
 print("\nMerged dataset saved successfully!")

@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 
 
-DATA_PATH = Path("data/processed/lahore_merged.csv")
+DATA_PATH = Path("data/interim/lahore_merged.csv")
 
 
 def validate_dataset(df):
