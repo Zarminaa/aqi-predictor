@@ -63,8 +63,8 @@ if __name__ == "__main__":
     data = client.historical_weather(
         latitude=31.5204,
         longitude=74.3587,
-        start_date="2020-12-01",
-        end_date="2026-07-15"
+        start_date="2022-08-05",
+        end_date="2026-07-17"
     )
 
 
