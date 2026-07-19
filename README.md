@@ -28,3 +28,11 @@ An end-to-end MLOps project that predicts Air Quality Index (AQI) for the next 3
 ## Project Structure
 <img width="215" height="271" alt="image" src="https://github.com/user-attachments/assets/fa4fa508-f89b-4679-86c4-5fd08b35bae3" />
 
+## Environment
+
+Python version:
+- Python 3.12.x
+
+Install dependencies:
+
+pip install -r requirements.txt

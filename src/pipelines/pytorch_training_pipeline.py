@@ -1,5 +1,6 @@
 from src.data.load_data import load_features
 from src.data.split_data import split_data
+from sklearn.preprocessing import StandardScaler
 
 from src.models.pytorch.dataset import create_dataloader
 from src.models.pytorch.train import train_pytorch
@@ -45,6 +46,20 @@ def train_pipeline(target):
     print(f"Training Samples   : {len(X_train)}")
     print(f"Validation Samples : {len(X_val)}")
     print(f"Testing Samples    : {len(X_test)}")
+
+
+     # ----------------------------------------------------
+    # Feature Scaling
+    # ----------------------------------------------------
+    print("\nScaling features...")
+
+    scaler = StandardScaler()
+
+    X_train = scaler.fit_transform(X_train)
+
+    X_val = scaler.transform(X_val)
+
+    X_test = scaler.transform(X_test)
 
     # ----------------------------------------------------
     # Create DataLoaders
