@@ -3,7 +3,7 @@ import pandas as pd
 
 
 from src.api.pollution import PollutionClient
-from src.config import (
+from src.configs.config import (
     LAT,
     LON,
     START_DATE,
