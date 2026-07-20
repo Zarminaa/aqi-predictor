@@ -1,11 +1,6 @@
 import torch.nn as nn
 
-from .config import (
-    HIDDEN_1,
-    HIDDEN_2,
-    HIDDEN_3,
-    DROPOUT,
-)
+from .config import DROPOUT
 
 
 class AQINetwork(nn.Module):
@@ -16,20 +11,22 @@ class AQINetwork(nn.Module):
 
         self.network = nn.Sequential(
 
-            nn.Linear(input_size, HIDDEN_1),
+            nn.Linear(input_size, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
             nn.Dropout(DROPOUT),
 
-            nn.Linear(HIDDEN_1, HIDDEN_2),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
             nn.Dropout(DROPOUT),
 
-            nn.Linear(HIDDEN_2, HIDDEN_3),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
 
-            nn.Linear(HIDDEN_3, 1),
+            nn.Linear(64, 1),
         )
 
     def forward(self, x):
-
         return self.network(x)

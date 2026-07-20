@@ -1,7 +1,7 @@
 from src.data.load_data import load_features
 from src.data.split_data import split_data
 from sklearn.preprocessing import StandardScaler
-
+from src.models.pytorch.save_scaler import save_scaler
 from src.models.pytorch.dataset import create_dataloader
 from src.models.pytorch.train import train_pytorch
 from src.models.pytorch.evaluate import evaluate_model
@@ -56,6 +56,10 @@ def train_pipeline(target):
     scaler = StandardScaler()
 
     X_train = scaler.fit_transform(X_train)
+    save_scaler(
+    scaler,
+    filename="pytorch_scaler.pkl",
+)
 
     X_val = scaler.transform(X_val)
 

@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 
@@ -11,14 +12,14 @@ def create_dataloader(
 ):
 
     X = torch.tensor(
-        X.values,
+        np.asarray(X),
         dtype=torch.float32,
     )
 
     if y is not None:
 
         y = torch.tensor(
-            y.values,
+            np.asarray(y),
             dtype=torch.float32,
         ).view(-1, 1)
 
