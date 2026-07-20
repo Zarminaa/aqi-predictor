@@ -21,3 +21,5 @@ def train_random_forest(
     model.fit(X_train, y_train)
 
     return model
+
+train_random_forest.requires_scaling = False

@@ -26,3 +26,5 @@ def train_xgboost(
     )
 
     return model
+
+train_xgboost.requires_scaling = False

@@ -22,3 +22,6 @@ def train_ridge(
     )
 
     return model
+
+
+train_ridge.requires_scaling = True

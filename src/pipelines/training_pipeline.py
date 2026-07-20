@@ -1,8 +1,11 @@
 from src.data.load_data import load_features
 from src.data.split_data import split_data
 
+from src.preprocessing.feature_scaling import scale_features
+
 from src.models.evaluate import evaluate_model
 from src.models.save_model import save_model
+from src.models.pytorch.save_scaler import save_scaler
 
 from src.models.random_forest.train import train_random_forest
 from src.models.ridge.train import train_ridge
@@ -64,6 +67,24 @@ def train_pipeline(
     print(f"Testing Samples    : {len(X_test)}")
 
     # ----------------------------------------------------
+    # Feature Scaling (Only if required)
+    # ----------------------------------------------------
+    if getattr(trainer, "requires_scaling", False):
+
+        print("\nScaling features...")
+
+        X_train, X_val, X_test, scaler = scale_features(
+            X_train,
+            X_val,
+            X_test,
+        )
+
+        save_scaler(
+            scaler=scaler,
+            filename=f"{model_name}_scaler.pkl",
+        )
+
+    # ----------------------------------------------------
     # Train Model
     # ----------------------------------------------------
     print(f"\nTraining {model_name}...")
@@ -100,9 +121,9 @@ def train_pipeline(
     # ----------------------------------------------------
     # Save Model
     # ----------------------------------------------------
-    filename = f"{model_name}_{target}.pkl"
-
     print("\nSaving model...")
+
+    filename = f"{model_name}_{target}.pkl"
 
     save_model(
         model=model,
@@ -125,16 +146,18 @@ def main():
     #     model_name="random_forest",
     #     target="target_day1",
     # )
+
+    train_pipeline(
+        trainer=train_ridge,
+        model_name="ridge",
+        target="target_day1",
+    )
+
     # train_pipeline(
-    #     trainer=train_ridge,
-    #     model_name="ridge",
+    #     trainer=train_xgboost,
+    #     model_name="xgboost",
     #     target="target_day1",
     # )
-    train_pipeline(
-    trainer=train_xgboost,
-    model_name="xgboost",
-    target="target_day1",
-)
 
 
 if __name__ == "__main__":
