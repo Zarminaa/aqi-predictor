@@ -5,7 +5,11 @@ from .config import DROPOUT
 
 class AQINetwork(nn.Module):
 
-    def __init__(self, input_size):
+    def __init__(
+        self,
+        input_size,
+        output_size,
+    ):
 
         super().__init__()
 
@@ -25,8 +29,11 @@ class AQINetwork(nn.Module):
             nn.BatchNorm1d(64),
             nn.ReLU(),
 
-            nn.Linear(64, 1),
+            nn.Linear(64, output_size),
         )
 
-    def forward(self, x):
+    def forward(
+        self,
+        x,
+    ):
         return self.network(x)

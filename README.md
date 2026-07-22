@@ -36,3 +36,17 @@ Python version:
 Install dependencies:
 
 pip install -r requirements.txt
+
+
+
+---
+
+Baseline models evaluated:
+
+- Ridge Regression
+- Random Forest
+- XGBoost
+- Feed-forward Neural Network
+
+Best performing model:
+XGBoost

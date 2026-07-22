@@ -13,6 +13,7 @@ from .config import (
 def train_pytorch(
     train_loader,
     input_size,
+    output_size,
 ):
 
     device = torch.device(
@@ -21,10 +22,9 @@ def train_pytorch(
         else "cpu"
     )
 
-    
-
     model = AQINetwork(
-        input_size=input_size
+        input_size=input_size,
+        output_size=output_size,
     ).to(device)
 
     criterion = nn.MSELoss()

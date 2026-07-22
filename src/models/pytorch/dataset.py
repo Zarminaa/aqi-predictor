@@ -19,9 +19,12 @@ def create_dataloader(
     if y is not None:
 
         y = torch.tensor(
-            np.asarray(y),
-            dtype=torch.float32,
-        ).view(-1, 1)
+        np.asarray(y),
+        dtype=torch.float32,
+    )
+
+        if y.ndim == 1:
+            y = y.unsqueeze(1)
 
         dataset = TensorDataset(
             X,
@@ -33,7 +36,8 @@ def create_dataloader(
         dataset = TensorDataset(X)
 
     return DataLoader(
-        dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=shuffle,
+    dataset,
+    batch_size=BATCH_SIZE,
+    shuffle=shuffle,
+    drop_last=shuffle,
     )

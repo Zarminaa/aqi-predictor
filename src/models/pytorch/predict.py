@@ -20,8 +20,11 @@ def predict(
 
             outputs = model(X)
 
-            predictions.extend(
-                outputs.cpu().numpy().flatten()
+            predictions.append(
+                outputs.cpu().numpy()
             )
 
-    return np.array(predictions)
+    return np.concatenate(
+        predictions,
+        axis=0,
+    )
