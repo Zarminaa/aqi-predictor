@@ -22,4 +22,5 @@ def train_random_forest(
 
     return model
 
+
 train_random_forest.requires_scaling = False

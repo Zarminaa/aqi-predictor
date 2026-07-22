@@ -5,6 +5,7 @@ from src.preprocessing.feature_scaling import scale_features
 
 from src.models.evaluate import evaluate_model
 from src.models.save_model import save_model
+from src.models.save_predictions import save_predictions
 from src.models.pytorch.save_scaler import save_scaler
 
 from src.models.random_forest.train import train_random_forest
@@ -28,8 +29,8 @@ def train_pipeline(
     model_name : str
         Name of the model.
 
-    target : str
-        Target column.
+    target : str or list[str]
+        Target column(s).
     """
 
     print("=" * 60)
@@ -65,6 +66,12 @@ def train_pipeline(
     print(f"Training Samples   : {len(X_train)}")
     print(f"Validation Samples : {len(X_val)}")
     print(f"Testing Samples    : {len(X_test)}")
+
+    print(f"X_train shape: {X_train.shape}")
+    print(f"y_train shape: {y_train.shape}")
+
+    print("\nFirst target row:")
+    print(y_train.iloc[0])
 
     # ----------------------------------------------------
     # Feature Scaling (Only if required)
@@ -119,15 +126,36 @@ def train_pipeline(
     )
 
     # ----------------------------------------------------
+    # Save Predictions
+    # ----------------------------------------------------
+    print("\nSaving predictions...")
+
+    predictions = model.predict(X_test)
+
+    if isinstance(target, list):
+        prediction_filename = f"{model_name}_multi_output_predictions.csv"
+    else:
+        prediction_filename = f"{model_name}_{target}_predictions.csv"
+
+    save_predictions(
+        y_true=y_test,
+        y_pred=predictions,
+        filename=prediction_filename,
+    )
+
+    # ----------------------------------------------------
     # Save Model
     # ----------------------------------------------------
     print("\nSaving model...")
 
-    filename = f"{model_name}_{target}.pkl"
+    if isinstance(target, list):
+        model_filename = f"{model_name}_multi_output.pkl"
+    else:
+        model_filename = f"{model_name}_{target}.pkl"
 
     save_model(
         model=model,
-        filename=filename,
+        filename=model_filename,
     )
 
     print("\nTraining pipeline completed successfully!")
@@ -141,23 +169,29 @@ def train_pipeline(
 
 def main():
 
+    TARGET_COLUMNS = [
+        "target_day1",
+        "target_day2",
+        "target_day3",
+    ]
+
+    # train_pipeline(
+    #     trainer=train_ridge,
+    #     model_name="ridge",
+    #     target=TARGET_COLUMNS,
+    # )
+
     # train_pipeline(
     #     trainer=train_random_forest,
     #     model_name="random_forest",
-    #     target="target_day1",
+    #     target=TARGET_COLUMNS,
     # )
 
     train_pipeline(
-        trainer=train_ridge,
-        model_name="ridge",
-        target="target_day1",
+        trainer=train_xgboost,
+        model_name="xgboost",
+        target=TARGET_COLUMNS,
     )
-
-    # train_pipeline(
-    #     trainer=train_xgboost,
-    #     model_name="xgboost",
-    #     target="target_day1",
-    # )
 
 
 if __name__ == "__main__":

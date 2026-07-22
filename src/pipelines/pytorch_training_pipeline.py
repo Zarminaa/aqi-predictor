@@ -58,7 +58,7 @@ def train_pipeline(target):
     X_train = scaler.fit_transform(X_train)
     save_scaler(
     scaler,
-    filename="pytorch_scaler.pkl",
+    filename=f"pytorch_{target}_scaler.pkl",
 )
 
     X_val = scaler.transform(X_val)

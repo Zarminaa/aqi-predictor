@@ -65,3 +65,6 @@ data/interim/*
 data/processed/*
 
 src/eda/plots/
+
+# Prediction outputs
+predictions/
