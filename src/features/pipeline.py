@@ -6,7 +6,8 @@ from src.features.trend_features import add_trend_features
 from src.features.interaction_features import add_interaction_features
 from src.features.target_features import add_targets
 
-def engineer_features(df):
+
+def engineer_features(df, add_target_features=True):
 
     df = add_time_features(df)
     df = add_cyclical_features(df)
@@ -14,7 +15,9 @@ def engineer_features(df):
     df = add_rolling_features(df)
     df = add_trend_features(df)
     df = add_interaction_features(df)
-    df = add_targets(df)
+
+    if add_target_features:
+        df = add_targets(df)
 
     df.drop(
         columns=[
