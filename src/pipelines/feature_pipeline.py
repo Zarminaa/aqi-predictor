@@ -4,7 +4,7 @@ from src.features.pipeline import engineer_features
 
 
 INPUT_PATH = "data/interim/lahore_merged.csv"
-OUTPUT_PATH = "data/processed/feature_store.csv"
+OUTPUT_PATH = "data/processed/features.csv"
 
 
 def main():

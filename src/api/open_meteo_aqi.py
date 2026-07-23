@@ -11,7 +11,7 @@ params = {
     "latitude": LATITUDE,
     "longitude": LONGITUDE,
     "start_date": "2022-08-05",
-    "end_date": "2026-07-17",
+    "end_date": "2026-07-22",
     "hourly": [
         "us_aqi",
         "pm2_5",
@@ -29,15 +29,30 @@ response = requests.get(URL, params=params)
 response.raise_for_status()
 
 hourly = response.json()["hourly"]
+
 df = pd.DataFrame(hourly)
 
+# Rename "time" to "datetime" to match the database schema
 df.rename(columns={"time": "datetime"}, inplace=True)
 
+# Convert datetime to PostgreSQL-friendly format
+df["datetime"] = (
+    pd.to_datetime(df["datetime"])
+      .dt.strftime("%Y-%m-%d %H:%M:%S")
+)
+
+# Ensure AQI is stored as an integer
+df["us_aqi"] = df["us_aqi"].astype("Int64")
+
 print(df.head())
-print(df.tail())
+print(df.dtypes)
 print(df.shape)
 
 output_file = "data/raw/lahore_pollution.csv"
-df.to_csv(output_file, index=False)
+
+df.to_csv(
+    output_file,
+    index=False
+)
 
 print(f"Saved {len(df)} rows to {output_file}")

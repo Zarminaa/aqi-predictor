@@ -175,11 +175,11 @@ def main():
         "target_day3",
     ]
 
-    # train_pipeline(
-    #     trainer=train_ridge,
-    #     model_name="ridge",
-    #     target=TARGET_COLUMNS,
-    # )
+    train_pipeline(
+        trainer=train_ridge,
+        model_name="ridge",
+        target=TARGET_COLUMNS,
+    )
 
     # train_pipeline(
     #     trainer=train_random_forest,
@@ -187,11 +187,11 @@ def main():
     #     target=TARGET_COLUMNS,
     # )
 
-    train_pipeline(
-        trainer=train_xgboost,
-        model_name="xgboost",
-        target=TARGET_COLUMNS,
-    )
+    # train_pipeline(
+    #     trainer=train_xgboost,
+    #     model_name="xgboost",
+    #     target=TARGET_COLUMNS,
+    # )
 
 
 if __name__ == "__main__":

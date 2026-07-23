@@ -1,12 +1,11 @@
-from src.data.load_data import load_features
 from src.data.split_data import split_data
 
 from sklearn.preprocessing import StandardScaler
 
-from src.models.pytorch.save_scaler import save_scaler
 from src.models.pytorch.dataset import create_dataloader
 from src.models.pytorch.train import train_pytorch
 from src.models.pytorch.evaluate import evaluate_model
+from src.models.pytorch.save_scaler import save_scaler
 from src.models.pytorch.save_model import save_model
 
 
@@ -15,6 +14,11 @@ def train_pipeline(target):
     PyTorch training pipeline.
     Supports single-output and multi-output targets.
     """
+
+    # IMPORTANT:
+    # Import Hopsworks only after torch-related imports
+    from src.data.load_data import load_features
+
 
     print("=" * 60)
     print("PYTORCH TRAINING PIPELINE")
@@ -64,6 +68,7 @@ def train_pipeline(target):
 
     scaler = StandardScaler()
 
+
     X_train = scaler.fit_transform(
         X_train
     )
@@ -102,6 +107,7 @@ def train_pipeline(target):
     # ----------------------------------------------------
     print("\nCreating DataLoaders...")
 
+
     train_loader = create_dataloader(
         X_train,
         y_train,
@@ -122,19 +128,18 @@ def train_pipeline(target):
 
 
     # ----------------------------------------------------
-    # Train Model
+    # Determine Output Size
     # ----------------------------------------------------
-    print("\nTraining PyTorch Model...")
-
-
-    # Handles both:
-    # y shape = (samples,)
-    # y shape = (samples,3)
-
     if y_train.ndim == 1:
         output_size = 1
     else:
         output_size = y_train.shape[1]
+
+
+    # ----------------------------------------------------
+    # Train Model
+    # ----------------------------------------------------
+    print("\nTraining PyTorch Model...")
 
 
     model, device = train_pytorch(
@@ -152,6 +157,7 @@ def train_pipeline(target):
     # ----------------------------------------------------
     print("\nValidation Results")
 
+
     validation_metrics = evaluate_model(
         model=model,
         dataloader=val_loader,
@@ -164,6 +170,7 @@ def train_pipeline(target):
     # Test Evaluation
     # ----------------------------------------------------
     print("\nTest Results")
+
 
     test_metrics = evaluate_model(
         model=model,

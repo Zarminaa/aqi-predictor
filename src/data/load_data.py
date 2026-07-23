@@ -1,30 +1,26 @@
-from pathlib import Path
-
-import pandas as pd
+import os
+import hopsworks
+from dotenv import load_dotenv
 
 
 def load_features():
-    """
-    Load engineered features dataset.
-    """
 
-    project_root = Path(__file__).resolve().parents[2]
+    load_dotenv()
 
-    features_path = (
-        project_root
-        / "data"
-        / "processed"
-        / "feature_store.csv"
+    project = hopsworks.login(
+        project="project_aqi",
+        host="eu-west.cloud.hopsworks.ai",
+        port=443,
+        api_key_value=os.getenv("HOPSWORKS_API_KEY")
     )
 
-    df = pd.read_csv(features_path)
+    fs = project.get_feature_store()
 
-    df["datetime"] = pd.to_datetime(df["datetime"])
-
-    df = (
-        df
-        .sort_values("datetime")
-        .reset_index(drop=True)
+    fg = fs.get_feature_group(
+        name="aqi_features",
+        version=1
     )
+
+    df = fg.read()
 
     return df
