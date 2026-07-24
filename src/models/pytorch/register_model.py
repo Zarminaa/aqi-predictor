@@ -8,9 +8,6 @@ def register_model(
     test_metrics,
     training_dataset_version=None,
 ):
-    """
-    Register a trained model in the Hopsworks Model Registry.
-    """
 
     mr = get_model_registry()
 
@@ -23,11 +20,11 @@ def register_model(
         "test_r2": test_metrics["Overall"]["R2"],
     }
 
-    model = mr.sklearn.create_model(
+    model = mr.torch.create_model(
         name=model_name,
         metrics=metrics,
         description=(
-            "Lahore AQI 3-Day Forecasting Model "
+            "Lahore AQI 3-Day Forecasting PyTorch Model "
             "using Hopsworks Feature Store"
         ),
     )
@@ -40,10 +37,13 @@ def register_model(
     print("=" * 50)
     print("Model Registered")
     print("=" * 50)
-    print(f"Name    : {model.name}")
+    print(f"Name    : {model_name}")
     print(f"Version : {model.version}")
 
     if training_dataset_version is not None:
-        print(f"Training Dataset Version : {training_dataset_version}")
+        print(
+            f"Training Dataset Version : "
+            f"{training_dataset_version}"
+        )
 
     return model

@@ -31,12 +31,32 @@ def split_data(
     """
 
     # ----------------------------------------------------
-    # Validate Target(s)
+    # Validate split ratios
+    # ----------------------------------------------------
+    if not (0 < train_ratio < 1):
+        raise ValueError(
+            "train_ratio must be between 0 and 1."
+        )
+
+    if not (0 <= val_ratio < 1):
+        raise ValueError(
+            "val_ratio must be between 0 and 1."
+        )
+
+    if train_ratio + val_ratio >= 1:
+        raise ValueError(
+            "train_ratio + val_ratio must be less than 1."
+        )
+
+    # ----------------------------------------------------
+    # Validate target(s)
     # ----------------------------------------------------
     if isinstance(target, str):
 
         if target not in TARGET_COLUMNS:
-            raise ValueError(f"Invalid target: {target}")
+            raise ValueError(
+                f"Invalid target: {target}"
+            )
 
     elif isinstance(target, list):
 
@@ -57,7 +77,17 @@ def split_data(
         )
 
     # ----------------------------------------------------
-    # Split Dataset
+    # Ensure chronological order
+    # ----------------------------------------------------
+    if "datetime" in df.columns:
+
+        df = (
+            df.sort_values("datetime")
+            .reset_index(drop=True)
+        )
+
+    # ----------------------------------------------------
+    # Split dataset
     # ----------------------------------------------------
     n = len(df)
 
@@ -69,15 +99,30 @@ def split_data(
     test_df = df.iloc[val_end:]
 
     # ----------------------------------------------------
-    # Feature Columns
+    # Validate split sizes
     # ----------------------------------------------------
+    if (
+        train_df.empty
+        or val_df.empty
+        or test_df.empty
+    ):
+        raise ValueError(
+            "One or more dataset splits are empty. "
+            "Adjust the split ratios."
+        )
+
+    # ----------------------------------------------------
+    # Feature columns
+    # ----------------------------------------------------
+    excluded_columns = set(TARGET_COLUMNS)
+
+    if "datetime" in df.columns:
+        excluded_columns.add("datetime")
+
     feature_columns = [
         column
         for column in df.columns
-        if column not in [
-            "datetime",
-            *TARGET_COLUMNS,
-        ]
+        if column not in excluded_columns
     ]
 
     # ----------------------------------------------------

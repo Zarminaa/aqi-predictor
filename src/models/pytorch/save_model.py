@@ -25,3 +25,5 @@ def save_model(
     )
 
     print(f"Model saved to:\n{model_path}")
+    
+    return str(model_path)
