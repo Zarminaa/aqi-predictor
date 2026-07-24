@@ -11,6 +11,7 @@ from src.models.pytorch.save_scaler import save_scaler
 from src.models.random_forest.train import train_random_forest
 from src.models.ridge.train import train_ridge
 from src.models.xgboost.train import train_xgboost
+from src.models.registry.register_model import register_model
 
 
 def train_pipeline(
@@ -153,10 +154,19 @@ def train_pipeline(
     else:
         model_filename = f"{model_name}_{target}.pkl"
 
-    save_model(
+    model_path = save_model(
         model=model,
         filename=model_filename,
     )
+
+    register_model(
+        model_name=model_name,
+        model_path=model_path,
+        validation_metrics=validation_metrics,
+        test_metrics=test_metrics,
+    )
+
+    
 
     print("\nTraining pipeline completed successfully!")
 
@@ -175,23 +185,23 @@ def main():
         "target_day3",
     ]
 
-    train_pipeline(
-        trainer=train_ridge,
-        model_name="ridge",
-        target=TARGET_COLUMNS,
-    )
+    # train_pipeline(
+    #     trainer=train_ridge,
+    #     model_name="aqi_ridge_3day",
+    #     target=TARGET_COLUMNS,
+    # )
 
     # train_pipeline(
     #     trainer=train_random_forest,
-    #     model_name="random_forest",
+    #     model_name="aqi_random_forest_3day",
     #     target=TARGET_COLUMNS,
     # )
 
-    # train_pipeline(
-    #     trainer=train_xgboost,
-    #     model_name="xgboost",
-    #     target=TARGET_COLUMNS,
-    # )
+    train_pipeline(
+        trainer=train_xgboost,
+        model_name="aqi_xgboost_3day",
+        target=TARGET_COLUMNS,
+    )
 
 
 if __name__ == "__main__":

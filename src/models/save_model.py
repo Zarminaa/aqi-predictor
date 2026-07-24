@@ -1,4 +1,5 @@
 from pathlib import Path
+from pathlib import Path
 import joblib
 
 
@@ -21,3 +22,5 @@ def save_model(
     joblib.dump(model, model_path)
 
     print(f"Model saved to:\n{model_path}")
+
+    return str(model_path)
