@@ -17,7 +17,7 @@ def load_features():
     fs = project.get_feature_store()
 
     fg = fs.get_feature_group(
-        name="aqi_features",
+        name="aqi_features_hudi",
         version=1
     )
 
