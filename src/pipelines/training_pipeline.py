@@ -3,6 +3,7 @@ from src.hopsworks.training_dataset import (
     get_training_dataset,
 )
 
+from src.models.registry.metadata import create_model_metadata
 from src.data.split_data import split_data
 
 from src.preprocessing.feature_scaling import scale_features
@@ -10,7 +11,7 @@ from src.preprocessing.feature_scaling import scale_features
 from src.models.evaluate import evaluate_model
 from src.models.save_model import save_model
 from src.models.save_predictions import save_predictions
-from src.models.pytorch.save_scaler import save_scaler
+
 
 from src.models.random_forest.train import train_random_forest
 from src.models.ridge.train import train_ridge
@@ -160,10 +161,7 @@ def train_pipeline(
         )
 
 
-        save_scaler(
-            scaler=scaler,
-            filename=f"{model_name}_scaler.pkl",
-        )
+        
 
 
     # ----------------------------------------------------
@@ -255,45 +253,49 @@ def train_pipeline(
     # ----------------------------------------------------
     # Save Model
     # ----------------------------------------------------
-
     print(
         "\nSaving model..."
     )
 
-
-    if isinstance(target, list):
-
-        model_filename = (
-            f"{model_name}_multi_output.pkl"
-        )
-
-    else:
-
-        model_filename = (
-            f"{model_name}_{target}.pkl"
-        )
-
-
-    model_path = save_model(
-        model=model,
-        filename=model_filename,
+    metadata = create_model_metadata(
+        model_name=model_name,
+        framework="scikit-learn",
+        algorithm=model.__class__.__name__,
+        training_dataset_version=training_dataset_version,
+        feature_columns=X_train.columns.tolist(),
+        target_columns=(
+            target
+            if isinstance(target, list)
+            else [target]
+        ),
+        requires_scaling=scaler is not None,
     )
 
-
+    model_dir = save_model(
+    model=model,
+    model_name=model_name,
+    feature_columns=X_train.columns.tolist(),
+    target_columns=(
+        target
+        if isinstance(target, list)
+        else [target]
+    ),
+    scaler=scaler,
+    metadata=metadata,
+)
     # ----------------------------------------------------
     # Register Model
     # ----------------------------------------------------
 
-    print(
-        "\nRegistering model..."
-    )
+    print("\nRegistering model...")
 
 
     register_model(
     model_name=model_name,
-    model_path=model_path,
+    model_dir=model_dir,
     validation_metrics=validation_metrics,
     test_metrics=test_metrics,
+    input_example=X_train.head(10),
     training_dataset_version=training_dataset_version,
 )
 
@@ -306,7 +308,7 @@ def train_pipeline(
         "model": model,
         "validation_metrics": validation_metrics,
         "test_metrics": test_metrics,
-        "model_path": model_path,
+        "model_path": model_dir,
         "training_dataset_version": training_dataset_version,
     }
 
@@ -323,28 +325,31 @@ def main():
 
     train_pipeline(
         trainer=train_ridge,
-        model_name="aqi_ridge_3day",
+        model_name="aqi_ridge_3day_",
         target=TARGET_COLUMNS,
         training_dataset_version=1,
     )
 
 
-    # train_pipeline(
-    #     trainer=train_random_forest,
-    #     model_name="aqi_random_forest_3day",
-    #     target=TARGET_COLUMNS,
-    #     training_dataset_version=1,
-    # )
+    train_pipeline(
+        trainer=train_random_forest,
+        model_name="aqi_random_forest_3day_",
+        target=TARGET_COLUMNS,
+        training_dataset_version=1,
+    )
 
 
-    # train_pipeline(
-    #     trainer=train_xgboost,
-    #     model_name="aqi_xgboost_3day",
-    #     target=TARGET_COLUMNS,
-    #     training_dataset_version=1,
-    # )
+    train_pipeline(
+        trainer=train_xgboost,
+        model_name="aqi_xgboost_3day_",
+        target=TARGET_COLUMNS,
+        training_dataset_version=1,
+    )
 
 
 
 if __name__ == "__main__":
     main()
+
+
+

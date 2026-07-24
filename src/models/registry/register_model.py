@@ -3,13 +3,15 @@ from src.hopsworks.model_registry import get_model_registry
 
 def register_model(
     model_name,
-    model_path,
+    model_dir,
     validation_metrics,
     test_metrics,
+    input_example,
     training_dataset_version=None,
 ):
     """
-    Register a trained model in the Hopsworks Model Registry.
+    Register a trained Scikit-learn model in the
+    Hopsworks Model Registry.
     """
 
     mr = get_model_registry()
@@ -25,15 +27,16 @@ def register_model(
 
     model = mr.sklearn.create_model(
         name=model_name,
-        metrics=metrics,
         description=(
-            "Lahore AQI 3-Day Forecasting Model "
-            "using Hopsworks Feature Store"
+            "Lahore AQI 3-Day Forecasting model "
+            "trained using the Hopsworks Feature Store."
         ),
+        metrics=metrics,
+        input_example=input_example,
     )
 
     model.save(
-        model_path,
+        model_dir,
         keep_original_files=True,
     )
 
@@ -44,6 +47,9 @@ def register_model(
     print(f"Version : {model.version}")
 
     if training_dataset_version is not None:
-        print(f"Training Dataset Version : {training_dataset_version}")
+        print(
+            f"Training Dataset Version : "
+            f"{training_dataset_version}"
+        )
 
     return model
