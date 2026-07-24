@@ -1,4 +1,5 @@
 import os
+
 import hopsworks
 from dotenv import load_dotenv
 
@@ -17,8 +18,12 @@ def get_feature_group():
     fs = project.get_feature_store()
 
     fg = fs.get_feature_group(
-        name="aqi_features",
+        name="aqi_features_hudi",
         version=1
     )
+
+    print(f"Connected to Feature Group: {fg.name}")
+    print(f"Version: {fg.version}")
+    print(f"Time Travel Format: {fg.time_travel_format}")
 
     return fg

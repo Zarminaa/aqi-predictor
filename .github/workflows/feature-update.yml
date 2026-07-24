@@ -3,9 +3,9 @@ name: Feature Update Pipeline
 on:
   workflow_dispatch:
 
-  #schedule:
+  schedule:
     # Every hour at minute 20
-    # - cron: "20 * * * *"
+    - cron: "20 * * * *"
 
 jobs:
   feature-update:
