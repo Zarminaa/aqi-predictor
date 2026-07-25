@@ -1,19 +1,20 @@
-from src.data.split_data import split_data
+# Force PyTorch to initialize first
+from src.models.pytorch.dataset import create_dataloader
+from src.models.pytorch.train import train_pytorch
+from src.models.pytorch.evaluate import evaluate_model
+from src.models.pytorch.save_model import save_model
+from src.models.pytorch.register_model import register_model
 
-from sklearn.preprocessing import StandardScaler
+from src.data.split_data import split_data
+from src.models.registry.metadata import create_model_metadata
+from src.preprocessing.feature_scaling import scale_features
 
 from src.hopsworks.training_dataset import (
     load_training_data,
     get_training_dataset,
 )
 
-from src.models.pytorch.dataset import create_dataloader
-from src.models.pytorch.train import train_pytorch
-from src.models.pytorch.evaluate import evaluate_model
-from src.models.pytorch.save_scaler import save_scaler
-from src.models.pytorch.save_model import save_model
-from src.models.pytorch.register_model import register_model
-
+MODEL_NAME = "aqi_pytorch_3day"
 
 def train_pipeline(
     target,
@@ -36,6 +37,8 @@ def train_pipeline(
     print("PYTORCH TRAINING PIPELINE")
     print("=" * 60)
 
+
+    
     # ----------------------------------------------------
     # Load Dataset
     # ----------------------------------------------------
@@ -87,6 +90,8 @@ def train_pipeline(
 
     print(f"\nX_train shape: {X_train.shape}")
     print(f"y_train shape: {y_train.shape}")
+    print("\nFirst target row:")
+    print(y_train.iloc[0])
 
     # ----------------------------------------------------
     # Feature Scaling
@@ -94,24 +99,12 @@ def train_pipeline(
 
     print("\nScaling features...")
 
-    scaler = StandardScaler()
-
-    X_train = scaler.fit_transform(
-        X_train,
-    )
-
-    X_val = scaler.transform(
-        X_val,
-    )
-
-    X_test = scaler.transform(
-        X_test,
-    )
-
-    save_scaler(
-        scaler=scaler,
-        filename="aqi_pytorch_3day_scaler.pkl",
-    )
+    X_train, X_val, X_test, scaler = scale_features(
+    X_train,
+    X_val,
+    X_test,
+)
+    
 
     # ----------------------------------------------------
     # Create DataLoaders
@@ -152,10 +145,12 @@ def train_pipeline(
 
     model, device = train_pytorch(
         train_loader=train_loader,
+        val_loader=val_loader,
+        y_val=y_val,
         input_size=X_train.shape[1],
         output_size=output_size,
     )
-
+    
     print("\nTraining completed!")
 
     # ----------------------------------------------------
@@ -184,16 +179,40 @@ def train_pipeline(
         device=device,
     )
 
+    metadata = create_model_metadata(
+        model_name=MODEL_NAME,
+        framework="PyTorch",
+        algorithm=model.__class__.__name__,
+        training_dataset_version=training_dataset_version,
+        feature_columns=X_train.columns.tolist(),
+        target_columns=(
+            target
+            if isinstance(target, list)
+            else [target]
+        ),
+        requires_scaling=scaler is not None,
+    )
+
     # ----------------------------------------------------
     # Save Model
     # ----------------------------------------------------
 
     print("\nSaving model...")
 
-    model_path = save_model(
-        model=model,
-        filename="aqi_pytorch_3day.pt",
-    )
+    model_dir = save_model(
+    model=model,
+    model_name=MODEL_NAME,
+    feature_columns=X_train.columns.tolist(),
+    target_columns=(
+        target
+        if isinstance(target, list)
+        else [target]
+    ),
+    input_size=X_train.shape[1],
+    output_size=output_size,
+    scaler=scaler,
+    metadata=metadata,
+)
 
     # ----------------------------------------------------
     # Register Model
@@ -202,23 +221,26 @@ def train_pipeline(
     print("\nRegistering model...")
 
     register_model(
-        model_name="aqi_pytorch_3day",
-        model_path=model_path,
-        validation_metrics=validation_metrics,
-        test_metrics=test_metrics,
-        training_dataset_version=training_dataset_version,
-    )
-
+    model_name=MODEL_NAME,
+    model_dir=model_dir,
+    validation_metrics=validation_metrics,
+    test_metrics=test_metrics,
+    input_example=X_train.head(10),
+    training_dataset_version=training_dataset_version,
+)
+    
     print(
         "\nTraining pipeline completed successfully!"
     )
+    
 
     return {
-        "model": model,
-        "validation_metrics": validation_metrics,
-        "test_metrics": test_metrics,
-        "training_dataset_version": training_dataset_version,
-    }
+    "model": model,
+    "validation_metrics": validation_metrics,
+    "test_metrics": test_metrics,
+    "model_path": model_dir,
+    "training_dataset_version": training_dataset_version,
+}
 
 
 def main():
