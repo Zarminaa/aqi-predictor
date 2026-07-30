@@ -282,6 +282,8 @@ def train_pipeline(
     ),
     scaler=scaler,
     metadata=metadata,
+    validation_metrics=validation_metrics,
+    test_metrics=test_metrics,
 )
     # ----------------------------------------------------
     # Register Model
@@ -323,20 +325,20 @@ def main():
     ]
 
 
-    train_pipeline(
-        trainer=train_ridge,
-        model_name="aqi_ridge_3day_",
-        target=TARGET_COLUMNS,
-        training_dataset_version=1,
-    )
+    # train_pipeline(
+    #     trainer=train_ridge,
+    #     model_name="aqi_ridge_3day_",
+    #     target=TARGET_COLUMNS,
+    #     training_dataset_version=1,
+    # )
 
 
-    train_pipeline(
-        trainer=train_random_forest,
-        model_name="aqi_random_forest_3day_",
-        target=TARGET_COLUMNS,
-        training_dataset_version=1,
-    )
+    # train_pipeline(
+    #     trainer=train_random_forest,
+    #     model_name="aqi_random_forest_3day_",
+    #     target=TARGET_COLUMNS,
+    #     training_dataset_version=1,
+    # )
 
 
     train_pipeline(

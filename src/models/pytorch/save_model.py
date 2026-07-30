@@ -130,3 +130,4 @@ def save_model(
     print(f"Location : {model_dir}")
 
     return str(model_dir)
+
