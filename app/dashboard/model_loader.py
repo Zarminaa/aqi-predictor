@@ -40,4 +40,4 @@ def load_model_artifacts():
     ) as f:
         metrics = json.load(f)
 
-    return xgb_model, metrics
+    return xgb_model, metrics, model_dir

@@ -3,7 +3,7 @@ import logging
 
 import pandas as pd
 import shap
-
+import os
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 
@@ -20,10 +20,6 @@ from app.dashboard.predictor import (
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-FEATURE_COLUMNS_PATH = (
-    "models/aqi_xgboost_3day_/feature_columns.json"
-)
 
 # --------------------------------------------------
 # Response Models
@@ -80,6 +76,7 @@ async def lifespan(app: FastAPI):
     (
         app.state.model,
         app.state.metrics,
+        app.state.model_dir,
     ) = load_model_artifacts()
 
     logger.info("Building SHAP Explainers...")
@@ -135,8 +132,13 @@ def predict(request: Request):
 
         model = request.app.state.model
 
+        feature_columns_path = os.path.join(
+        request.app.state.model_dir,
+        "feature_columns.json",
+        )
+
         X, latest = build_latest_features(
-            FEATURE_COLUMNS_PATH,
+            feature_columns_path,
         )
 
         prediction = predict_aqi(
@@ -241,8 +243,13 @@ def shap_values(request: Request):
 
         explainers = request.app.state.explainers
 
+        feature_columns_path = os.path.join(
+        request.app.state.model_dir,
+        "feature_columns.json",
+    )
+
         X, latest = build_latest_features(
-            FEATURE_COLUMNS_PATH,
+            feature_columns_path,
         )
 
         total_importance = None
