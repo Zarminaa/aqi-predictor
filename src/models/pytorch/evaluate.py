@@ -88,7 +88,7 @@ def evaluate_model(
         print(f"R²   : {r2:.3f}")
 
 
-        results[f"Day_{i+1}"] = {
+        results[f"Day{i+1}"] = {
             "MAE": mae,
             "RMSE": rmse,
             "R2": r2,

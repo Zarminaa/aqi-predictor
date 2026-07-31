@@ -1,5 +1,7 @@
 import copy
+import random
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.optim import Adam
@@ -9,6 +11,7 @@ from src.models.pytorch.evaluate import evaluate_model
 from .config import (
     EPOCHS,
     LEARNING_RATE,
+    RANDOM_STATE,
 )
 from .model import AQINetwork
 
@@ -20,12 +23,34 @@ def train_pytorch(
     input_size,
     output_size,
 ):
+    # ------------------------------------------
+    # Reproducibility
+    # ------------------------------------------
+
+    random.seed(RANDOM_STATE)
+    np.random.seed(RANDOM_STATE)
+
+    torch.manual_seed(RANDOM_STATE)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(RANDOM_STATE)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    # ------------------------------------------
+    # Device
+    # ------------------------------------------
 
     device = torch.device(
         "cuda"
         if torch.cuda.is_available()
         else "cpu"
     )
+
+    # ------------------------------------------
+    # Model
+    # ------------------------------------------
 
     model = AQINetwork(
         input_size=input_size,
@@ -39,6 +64,10 @@ def train_pytorch(
         lr=LEARNING_RATE,
     )
 
+    # ------------------------------------------
+    # Training
+    # ------------------------------------------
+
     best_r2 = float("-inf")
     best_model = None
 
@@ -46,7 +75,7 @@ def train_pytorch(
 
         model.train()
 
-        epoch_loss = 0
+        epoch_loss = 0.0
 
         for X_batch, y_batch in train_loader:
 
@@ -69,13 +98,14 @@ def train_pytorch(
             epoch_loss += loss.item()
 
         print(
-            f"Epoch {epoch+1:03d}/{EPOCHS} "
+            f"Epoch {epoch + 1:03d}/{EPOCHS} "
             f"Loss: {epoch_loss / len(train_loader):.4f}"
         )
 
         # ------------------------------------------
         # Evaluate every 10 epochs
         # ------------------------------------------
+
         if (epoch + 1) % 10 == 0:
 
             print("\nValidation Results")
@@ -104,8 +134,8 @@ def train_pytorch(
     # ------------------------------------------
     # Restore best model
     # ------------------------------------------
-    if best_model is not None:
 
+    if best_model is not None:
         model = best_model
 
     print("\n" + "=" * 50)

@@ -1,5 +1,6 @@
 import datetime
 import os
+import textwrap
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -136,6 +137,52 @@ st.markdown(
         color: #475569;
     }
 
+    /* Custom Weather Card Grid */
+    .weather-card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .weather-card {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 12px 16px;
+        backdrop-filter: blur(12px);
+        transition: border-color 0.2s ease;
+    }
+
+    .weather-card:hover {
+        border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .weather-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .weather-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #f8fafc;
+        letter-spacing: -0.02em;
+    }
+
+    .weather-unit {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin-left: 2px;
+    }
+
     /* Status Top Highlights */
     .aqi-card-good::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #10b981; box-shadow: 0 2px 10px #10b981; }
     .aqi-card-moderate::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #f59e0b; box-shadow: 0 2px 10px #f59e0b; }
@@ -187,6 +234,41 @@ st.markdown(
     .alert-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #fde047; }
     .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #6ee7b7; }
 
+    /* Model Performance Day Glass Cards */
+    .day-perf-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .day-perf-header {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #38bdf8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 8px;
+    }
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+    }
+    .metric-row-label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .metric-row-val {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #f8fafc;
+    }
+
     /* Streamlit Tabs Customization */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
@@ -229,6 +311,14 @@ def get_prediction():
 
 
 @st.cache_data(ttl=300)
+def get_metrics():
+    try:
+        return api_get("/metrics")
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=300)
 def get_history():
     history = api_get("/history")
     return pd.DataFrame(history)
@@ -264,18 +354,16 @@ def get_aqi_details(aqi):
 
 
 def render_card(title, value, status, card_class, color, bg_color):
-    st.markdown(
-        f"""
-        <div class="metric-card {card_class}">
-            <div class="card-title">{title}</div>
-            <div class="card-value">{value}</div>
-            <div class="card-status-pill" style="color: {color}; background-color: {bg_color}; border: 1px solid {color}40;">
-                {status}
-            </div>
+    html = f"""
+    <div class="metric-card {card_class}">
+        <div class="card-title">{title}</div>
+        <div class="card-value">{value}</div>
+        <div class="card-status-pill" style="color: {color}; background-color: {bg_color}; border: 1px solid {color}40;">
+            {status}
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """
+    st.markdown(textwrap.dedent(html), unsafe_allow_html=True)
 
 
 # --------------------------------------------------
@@ -286,14 +374,15 @@ try:
     data = get_prediction()
     prediction = data["prediction"]
     current = data["current"]
-    
+
     last_updated = data.get("last_updated")
-    last_updated = pd.to_datetime(last_updated, utc=True)
-    last_updated = (
-    last_updated
-    .tz_convert("Asia/Karachi")
-    .strftime("%Y-%m-%d %H:%M:%S PKT")
-)
+    if last_updated:
+        last_updated = pd.to_datetime(last_updated, utc=True)
+        last_updated = (
+            last_updated
+            .tz_convert("Asia/Karachi")
+            .strftime("%Y-%m-%d %H:%M:%S PKT")
+        )
 except Exception as e:
     st.error(f"Unable to establish connection to processing backend.\n\n`{e}`")
     st.stop()
@@ -434,12 +523,12 @@ else:
 
 
 # --------------------------------------------------
-# Forecast Trajectory & Weather
+# Forecast Trajectory & Ambient Climate Grid
 # --------------------------------------------------
 
 st.write("")
 
-chart_col, weather_col = st.columns([1.3, 0.7])
+chart_col, weather_col = st.columns([1.2, 0.8])
 
 with chart_col:
     st.markdown("<h3 style='font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px;'>AQI Trend Projection</h3>", unsafe_allow_html=True)
@@ -479,24 +568,48 @@ with chart_col:
 with weather_col:
     st.markdown("<h3 style='font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px;'>Ambient Climate</h3>", unsafe_allow_html=True)
 
-    w1, w2 = st.columns(2)
-    with w1:
-        st.metric("Temperature", f"{current['temperature']:.1f} °C")
-        st.metric("Wind Speed", f"{current['wind_speed']:.1f} km/h")
-        st.metric("Dew Point", f"{current['dew_point']:.1f} °C")
-    with w2:
-        st.metric("Humidity", f"{current['humidity']:.1f} %")
-        st.metric("Pressure", f"{current['pressure']:.1f} hPa")
-        st.metric("Cloud Cover", f"{current['cloud_cover']:.1f} %")
+    weather_html = f"""
+    <div class="weather-card-grid">
+        <div class="weather-card">
+            <div class="weather-label">🌡︎ Temp</div>
+            <div class="weather-value">{current['temperature']:.1f}<span class="weather-unit">°C</span></div>
+        </div>
+        <div class="weather-card">
+            <div class="weather-label">💧︎ Humidity</div>
+            <div class="weather-value">{current['humidity']:.1f}<span class="weather-unit">%</span></div>
+        </div>
+        <div class="weather-card">
+            <div class="weather-label">💨︎ Wind</div>
+            <div class="weather-value">{current['wind_speed']:.1f}<span class="weather-unit">km/h</span></div>
+        </div>
+        <div class="weather-card">
+            <div class="weather-label">⏲ Pressure</div>
+            <div class="weather-value">{current['pressure']:.1f}<span class="weather-unit">hPa</span></div>
+        </div>
+        <div class="weather-card">
+            <div class="weather-label">⛆ Dew Point</div>
+            <div class="weather-value">{current['dew_point']:.1f}<span class="weather-unit">°C</span></div>
+        </div>
+        <div class="weather-card">
+            <div class="weather-label">☁ Cloud Cover</div>
+            <div class="weather-value">{current['cloud_cover']:.1f}<span class="weather-unit">%</span></div>
+        </div>
+    </div>
+    """
+    st.markdown(textwrap.dedent(weather_html), unsafe_allow_html=True)
 
 
 # --------------------------------------------------
-# Historical & Explainability Analytics
+# Historical, SHAP & Performance Analytics
 # --------------------------------------------------
 
 st.write("")
 
-tab1, tab2 = st.tabs(["Historical AQI Trends", "Feature Importance (SHAP Explainability)"])
+tab1, tab2, tab3 = st.tabs([
+    "Historical AQI Trends", 
+    "Feature Importance (SHAP Explainability)",
+    "Model Performance & Health"
+])
 
 with tab1:
     try:
@@ -567,3 +680,127 @@ with tab2:
 
     except Exception as e:
         st.warning(f"Unable to render SHAP explainability chart.\n\n`{e}`")
+
+with tab3:
+    try:
+        raw_metrics = get_metrics()
+
+        validation = raw_metrics["validation"]
+        test = raw_metrics["test"]
+
+        st.markdown(
+            """
+            <p style='font-size:0.82rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;'>
+            Multi-Horizon Model Evaluation
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        def render_metrics(title, metrics_data):
+            html = f"""
+            <div class="day-perf-card">
+                <div class="day-perf-header">{title}</div>
+                <div class="metric-row">
+                    <span class="metric-row-label">Mean Absolute Error (MAE)</span>
+                    <span class="metric-row-val">{metrics_data['MAE']:.2f}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-row-label">Root Mean Squared Error (RMSE)</span>
+                    <span class="metric-row-val">{metrics_data['RMSE']:.2f}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-row-label">R² Score</span>
+                    <span class="metric-row-val" style="color:#10b981;">{metrics_data['R2']:.3f}</span>
+                </div>
+            </div>
+            """
+            st.markdown(textwrap.dedent(html), unsafe_allow_html=True)
+
+        st.subheader("Validation Performance")
+        cols = st.columns(3)
+        for col, day in zip(cols, ["Day1", "Day2", "Day3"]):
+            with col:
+                render_metrics(day, validation[day])
+
+        st.subheader("Test Performance")
+        cols = st.columns(3)
+        for col, day in zip(cols, ["Day1", "Day2", "Day3"]):
+            with col:
+                render_metrics(day, test[day])
+
+        st.write("")
+        st.subheader("Error & Performance Trajectory Across Horizons")
+
+        # Dataframe for Metrics
+        horizon_df = pd.DataFrame({
+            "Forecast Horizon": ["Day 1", "Day 2", "Day 3"],
+            "MAE": [test["Day1"]["MAE"], test["Day2"]["MAE"], test["Day3"]["MAE"]],
+            "RMSE": [test["Day1"]["RMSE"], test["Day2"]["RMSE"], test["Day3"]["RMSE"]],
+            "R2": [test["Day1"]["R2"], test["Day2"]["R2"], test["Day3"]["R2"]],
+        })
+
+        # Plotly Dual Y-Axis Figure
+        fig_metrics = go.Figure()
+
+        # MAE Line (Primary Y-Axis)
+        fig_metrics.add_trace(go.Scatter(
+            x=horizon_df["Forecast Horizon"],
+            y=horizon_df["MAE"],
+            name="MAE",
+            mode="lines+markers",
+            line=dict(color="#38bdf8", width=3),
+            marker=dict(size=8),
+        ))
+
+        # RMSE Line (Primary Y-Axis)
+        fig_metrics.add_trace(go.Scatter(
+            x=horizon_df["Forecast Horizon"],
+            y=horizon_df["RMSE"],
+            name="RMSE",
+            mode="lines+markers",
+            line=dict(color="#f59e0b", width=3, dash="dash"),
+            marker=dict(size=8),
+        ))
+
+        # R2 Line (Secondary Y-Axis)
+        fig_metrics.add_trace(go.Scatter(
+            x=horizon_df["Forecast Horizon"],
+            y=horizon_df["R2"],
+            name="R² Score",
+            mode="lines+markers",
+            yaxis="y2",
+            line=dict(color="#10b981", width=3),
+            marker=dict(size=8),
+        ))
+
+        fig_metrics.update_layout(
+            template="plotly_dark",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
+            height=320,
+            margin=dict(l=10, r=10, t=30, b=10),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(
+                title="Error Score (AQI)",
+                showgrid=True,
+                gridcolor="rgba(255,255,255,0.05)"
+            ),
+            yaxis2=dict(
+                title="R² Score",
+                overlaying="y",
+                side="right",
+                range=[0, 1.05],
+                showgrid=False
+            ),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+
+        st.plotly_chart(
+            fig_metrics,
+            use_container_width=True,
+            config={"displayModeBar": False}
+        )
+
+    except Exception as e:
+        st.warning(f"Unable to render model performance.\n\n`{e}`")

@@ -7,7 +7,7 @@ import shap
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 
-from app.dashboard.model_loader import load_xgboost_model
+from app.dashboard.model_loader import load_model_artifacts
 from app.dashboard.predictor import (
     build_latest_features,
     predict_aqi,
@@ -63,6 +63,10 @@ class HistoryResponse(BaseModel):
     datetime: list[str]
     aqi: list[float]
 
+class MetricsResponse(BaseModel):
+    validation: dict
+    test: dict
+
 
 # --------------------------------------------------
 # Lifespan
@@ -71,8 +75,12 @@ class HistoryResponse(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    logger.info("Loading XGBoost Model...")
-    app.state.model = load_xgboost_model()
+    logger.info("Loading model artifacts...")
+
+    (
+        app.state.model,
+        app.state.metrics,
+    ) = load_model_artifacts()
 
     logger.info("Building SHAP Explainers...")
 
@@ -203,6 +211,20 @@ def history():
             status_code=500,
             detail=str(e),
         )
+
+
+# --------------------------------------------------
+# Model Metrics
+# --------------------------------------------------
+
+@app.get(
+    "/metrics",
+    response_model=MetricsResponse,
+    tags=["Model"],
+)
+def metrics(request: Request):
+
+    return request.app.state.metrics
 
 
 # --------------------------------------------------

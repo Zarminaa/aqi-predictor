@@ -212,6 +212,8 @@ def train_pipeline(
     output_size=output_size,
     scaler=scaler,
     metadata=metadata,
+    validation_metrics=validation_metrics,
+    test_metrics=test_metrics,
 )
 
     # ----------------------------------------------------

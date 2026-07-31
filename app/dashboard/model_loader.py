@@ -1,10 +1,12 @@
+import json
 import os
+
 import joblib
 import hopsworks
 from dotenv import load_dotenv
 
 
-def load_xgboost_model():
+def load_model_artifacts():
 
     load_dotenv()
 
@@ -19,7 +21,7 @@ def load_xgboost_model():
 
     model = mr.get_model(
         name="aqi_xgboost_3day_",
-        version=1
+        version=1,
     )
 
     model_dir = model.download()
@@ -27,11 +29,15 @@ def load_xgboost_model():
     print("Downloaded model files:")
     print(os.listdir(model_dir))
 
-    model_path = os.path.join(
-        model_dir,
-        "model.pkl"
+    xgb_model = joblib.load(
+        os.path.join(model_dir, "model.pkl")
     )
 
-    xgb_model = joblib.load(model_path)
+    with open(
+        os.path.join(model_dir, "metrics.json"),
+        "r",
+        encoding="utf-8",
+    ) as f:
+        metrics = json.load(f)
 
-    return xgb_model
+    return xgb_model, metrics

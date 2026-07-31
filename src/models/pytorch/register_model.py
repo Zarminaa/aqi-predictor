@@ -10,7 +10,7 @@ def register_model(
     training_dataset_version=None,
 ):
     """
-    Register a trained Scikit-learn model in the
+    Register a trained PyTorch model in the
     Hopsworks Model Registry.
     """
 
@@ -25,7 +25,7 @@ def register_model(
         "test_r2": test_metrics["Overall"]["R2"],
     }
 
-    model = mr.sklearn.create_model(
+    model = mr.torch.create_model(
         name=model_name,
         description=(
             "Lahore AQI 3-Day Forecasting model "

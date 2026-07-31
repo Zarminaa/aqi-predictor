@@ -15,6 +15,8 @@ def save_model(
     output_size,
     scaler=None,
     metadata=None,
+    validation_metrics=None,
+    test_metrics=None,
 ):
     """
     Export a complete PyTorch model artifact.
@@ -24,6 +26,7 @@ def save_model(
             model.pt
             scaler.pkl (optional)
             metadata.json
+            metrics.json
             feature_columns.json
             target_columns.json
     """
@@ -119,6 +122,28 @@ def save_model(
 
         json.dump(
             metadata,
+            f,
+            indent=4,
+            sort_keys=True,
+        )
+
+ # -----------------------------------------
+# Save evaluation metrics
+# -----------------------------------------
+
+    metrics = {
+        "validation": validation_metrics,
+        "test": test_metrics,
+    }
+
+    with open(
+        model_dir / "metrics.json",
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        json.dump(
+            metrics,
             f,
             indent=4,
             sort_keys=True,
