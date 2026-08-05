@@ -345,7 +345,7 @@ def main():
         trainer=train_xgboost,
         model_name="aqi_xgboost_3day_",
         target=TARGET_COLUMNS,
-        training_dataset_version=1,
+        training_dataset_version=None,
     )
 
 
