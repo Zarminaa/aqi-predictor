@@ -40,6 +40,10 @@ The pipeline continuously collects historical weather and air pollution data fro
 
 Unlike traditional machine learning notebooks, this project emphasizes reproducibility, modularity, automation, and scalable engineering practices.
 
+## Live Demo
+
+**Streamlit Dashboard:** [https://your-app-name.streamlit.app](https://lahore-cantonment-aqi-predictor.streamlit.app/)
+
 ---
 
 #  Objectives
