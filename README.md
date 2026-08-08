@@ -33,7 +33,8 @@ An industry-inspired Machine Learning Operations (MLOps) project that automates 
 
 Air pollution is one of the world's leading environmental and public health concerns. Reliable short-term Air Quality Index (AQI) forecasting enables individuals, healthcare organizations, and policymakers to make informed decisions regarding outdoor activities and pollution mitigation.
 
-AQI Predictor is a production-inspired Machine Learning Operations (MLOps) project that automates the complete machine learning lifecycle for AQI prediction.
+AQI Predictor is an end-to-end MLOps project designed to forecast the Air Quality Index (AQI) for the **next three days in Lahore Cantonment, Pakistan**. The project automates the complete machine learning lifecycle—from data ingestion and validation to feature engineering, model training, experiment tracking, and interactive visualization.
+
 
 The pipeline continuously collects historical weather and air pollution data from Open-Meteo APIs, validates incoming data, engineers predictive features, trains multiple machine learning models, tracks experiments using MLflow, stores reusable features in Hopsworks Feature Store, and presents predictions through an interactive Streamlit dashboard.
 
@@ -233,7 +234,6 @@ Streamlit Dashboard
 | Machine Learning | Scikit-Learn,Pytorch |
 | Experiment Tracking | MLflow |
 | Feature Store | Hopsworks |
-| Data Versioning | DVC |
 | Dashboard | Streamlit |
 | Automation | GitHub Actions |
 | Database | Supabase |
