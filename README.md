@@ -253,13 +253,6 @@ Streamlit Dashboard
 <img width="905" height="286" alt="image" src="https://github.com/user-attachments/assets/b5069a3e-cec0-47f8-b032-878927235f78" />
 
 
-```text
-reports/
-└── figures/
-
-```
-
-
 # 📂 Repository Structure
 
 ```text
