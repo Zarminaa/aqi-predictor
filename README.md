@@ -42,7 +42,7 @@ Unlike traditional machine learning notebooks, this project emphasizes reproduci
 
 ## Live Demo
 
-**Streamlit Dashboard:** [https://your-app-name.streamlit.app](https://lahore-cantonment-aqi-predictor.streamlit.app/)
+**Streamlit Dashboard:** [https://aqi-predictor.streamlit.app](https://lahore-cantonment-aqi-predictor.streamlit.app/)
 
 ---
 
