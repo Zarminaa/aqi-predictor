@@ -228,7 +228,7 @@ Streamlit Dashboard
 
 | Category | Technologies |
 |-----------|-------------|
-| Programming Language | Python 3.12 or later |
+| Programming Language | Python 3.12  |
 | Data Processing | Pandas, NumPy |
 | Visualization | Plotly, Matplotlib |
 | Machine Learning | Scikit-Learn,Pytorch |
