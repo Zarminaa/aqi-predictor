@@ -94,3 +94,999 @@ This one-time historical backfill creates the complete dataset used during model
 Both weather and pollution observations are collected using the same temporal range to ensure every record can later be matched using its timestamp.
 
 ---
+
+# Weather Data Collection
+
+Historical weather observations are collected using the **Open-Meteo Historical Weather API**. These observations provide the meteorological conditions that influence air quality and serve as important predictive features for the machine learning models.
+
+The API returns historical hourly weather data for the specified geographical coordinates and time range.
+
+---
+
+## API Endpoint
+
+```text
+https://archive-api.open-meteo.com/v1/archive
+```
+
+---
+
+## Request Configuration
+
+The following parameters are used when requesting historical weather data.
+
+| Parameter | Value |
+|-----------|-------|
+| Latitude | 31.5204 |
+| Longitude | 74.3587 |
+| Start Date | 2022-08-05 |
+| End Date | 2026-07-22 |
+| Time Zone | UTC |
+| Temperature Unit | Celsius |
+| Wind Speed Unit | km/h |
+| Precipitation Unit | mm |
+| Frequency | Hourly |
+
+---
+
+## Collected Features
+
+The following meteorological variables are retrieved every hour.
+
+| Feature | Description | Unit |
+|----------|-------------|------|
+| `temperature_2m` | Air temperature measured at 2 meters above ground level | °C |
+| `relative_humidity_2m` | Relative humidity | % |
+| `dew_point_2m` | Dew point temperature | °C |
+| `surface_pressure` | Atmospheric pressure at the surface | hPa |
+| `wind_speed_10m` | Wind speed measured at 10 meters | km/h |
+| `wind_direction_10m` | Wind direction | Degrees |
+| `precipitation` | Hourly precipitation | mm |
+| `cloud_cover` | Percentage of sky covered by clouds | % |
+
+These variables are later used during feature engineering to generate lag features, rolling statistics, cyclical time features, interaction features, and other derived variables used for AQI prediction.
+
+---
+
+## Data Processing
+
+After receiving the API response, the weather data undergoes several standardization steps before being stored.
+
+### Timestamp Standardization
+
+The Open-Meteo API returns timestamps in a column named `time`.
+
+To maintain consistency across the project and database schema, this column is renamed to:
+
+```text
+datetime
+```
+
+---
+
+### Datetime Formatting
+
+The timestamps are converted into a PostgreSQL-compatible datetime format.
+
+Example:
+
+```text
+2026-07-22T13:00
+```
+
+becomes
+
+```text
+2026-07-22 13:00:00
+```
+
+Using a standardized datetime format ensures compatibility with CSV files, PostgreSQL, Supabase, and downstream processing pipelines.
+
+---
+
+### Data Type Conversion
+
+Several weather variables contain integer values but may include missing observations.
+
+To preserve missing values while maintaining integer semantics, the following columns are converted to Pandas' nullable integer (`Int64`) data type:
+
+- `relative_humidity_2m`
+- `wind_direction_10m`
+- `cloud_cover`
+
+Floating-point variables such as temperature, precipitation, pressure, and wind speed retain their original precision.
+
+---
+
+## Output Dataset
+
+After processing, the weather observations are saved as:
+
+```text
+data/raw/lahore_weather.csv
+```
+
+Each row represents one hourly weather observation for Lahore.
+
+The dataset serves as one of the two primary inputs to the data merging stage.
+
+---
+
+## Workflow
+
+```text
+Open-Meteo Historical Weather API
+                │
+                ▼
+      Download Hourly Weather Data
+                │
+                ▼
+      Rename time → datetime
+                │
+                ▼
+      Format PostgreSQL Datetime
+                │
+                ▼
+      Convert Integer Columns
+                │
+                ▼
+     Save lahore_weather.csv
+```
+
+---
+
+## Role in the Pipeline
+
+The weather dataset provides the environmental variables that influence air quality. After collection, it is merged with the air quality dataset using the common `datetime` column to create a unified dataset for preprocessing, feature engineering, model training, and inference.
+
+# Air Quality Data Collection
+
+Historical air quality observations are collected using the **Open-Meteo Air Quality API**. These observations provide the Air Quality Index (AQI) together with atmospheric pollutant concentrations that serve as both predictive features and the target variable for the forecasting model.
+
+The API retrieves hourly historical air quality data for the selected geographical location using the **CAMS Global atmospheric model**.
+
+---
+
+## API Endpoint
+
+```text
+https://air-quality-api.open-meteo.com/v1/air-quality
+```
+
+---
+
+## Request Configuration
+
+The following parameters are used when requesting historical air quality observations.
+
+| Parameter | Value |
+|-----------|-------|
+| Latitude | 31.5204 |
+| Longitude | 74.3587 |
+| Start Date | 2022-08-05 |
+| End Date | 2026-07-22 |
+| Time Zone | UTC |
+| Atmospheric Model | CAMS Global |
+| Frequency | Hourly |
+
+---
+
+## Collected Features
+
+The following air quality variables are collected every hour.
+
+| Feature | Description | Unit |
+|----------|-------------|------|
+| `us_aqi` | United States Air Quality Index | AQI |
+| `pm2_5` | Fine particulate matter (diameter ≤ 2.5 μm) | μg/m³ |
+| `pm10` | Coarse particulate matter (diameter ≤ 10 μm) | μg/m³ |
+| `carbon_monoxide` | Carbon monoxide concentration | μg/m³ |
+| `nitrogen_dioxide` | Nitrogen dioxide concentration | μg/m³ |
+| `sulphur_dioxide` | Sulphur dioxide concentration | μg/m³ |
+| `ozone` | Ozone concentration | μg/m³ |
+
+These variables capture the concentration of major atmospheric pollutants that directly influence air quality and are used during feature engineering and model training.
+
+---
+
+## Data Processing
+
+After receiving the API response, the air quality dataset is standardized before being stored.
+
+### Timestamp Standardization
+
+The Open-Meteo API returns timestamps in a column named:
+
+```text
+time
+```
+
+For consistency across the project, this column is renamed to:
+
+```text
+datetime
+```
+
+This allows weather and pollution datasets to share a common key for merging.
+
+---
+
+### Datetime Formatting
+
+The timestamps are converted into PostgreSQL-compatible datetime format.
+
+Example:
+
+```text
+2026-07-22T13:00
+```
+
+becomes
+
+```text
+2026-07-22 13:00:00
+```
+
+Using a common datetime format simplifies storage, database operations, and downstream processing.
+
+---
+
+### AQI Data Type Conversion
+
+The Air Quality Index (`us_aqi`) is converted to Pandas' nullable integer (`Int64`) data type.
+
+This preserves integer AQI values while allowing missing observations to remain as null values if encountered.
+
+All pollutant concentration variables remain in floating-point format to preserve measurement precision.
+
+---
+
+## Output Dataset
+
+After processing, the dataset is saved as:
+
+```text
+data/raw/lahore_pollution.csv
+```
+
+Each row represents one hourly air quality observation for Lahore.
+
+This dataset serves as the second input to the data merging stage.
+
+---
+
+## Workflow
+
+```text
+Open-Meteo Air Quality API
+              │
+              ▼
+ Download Hourly AQI Data
+              │
+              ▼
+ Rename time → datetime
+              │
+              ▼
+ Format PostgreSQL Datetime
+              │
+              ▼
+ Convert AQI to Integer
+              │
+              ▼
+ Save lahore_pollution.csv
+```
+
+---
+
+## Role in the Pipeline
+
+The air quality dataset contains both the target variable (`us_aqi`) and pollutant measurements that describe atmospheric conditions.
+
+After collection, it is merged with the weather dataset using the shared `datetime` column, producing a unified dataset that is used for preprocessing, feature engineering, exploratory data analysis, model training, explainability, and inference.
+
+# Data Merging
+
+After collecting weather and air quality observations, both datasets are merged into a single unified dataset. Since both APIs provide hourly observations using the same timestamps, the `datetime` column is used as the common key for integration.
+
+The merged dataset combines meteorological variables with pollutant concentrations, allowing the machine learning model to learn the relationship between weather conditions and air quality.
+
+---
+
+## Merge Strategy
+
+The weather and pollution datasets are merged using an **inner join** on the `datetime` column.
+
+```python
+merged = pollution.merge(
+    weather,
+    on="datetime",
+    how="inner"
+)
+```
+
+An inner join ensures that only timestamps available in both datasets are retained. This guarantees that every observation contains complete weather and air quality information.
+
+---
+
+## Merge Workflow
+
+```text
+lahore_weather.csv
+        │
+        │
+        ├──────────────┐
+        │              │
+        ▼              ▼
+        Merge on datetime
+              │
+              ▼
+      lahore_merged.csv
+```
+
+---
+
+## Output Dataset
+
+The merged dataset is saved as:
+
+```text
+data/interim/lahore_merged.csv
+```
+
+Each row represents a single hourly observation containing:
+
+- Timestamp
+- Weather measurements
+- Air pollutant concentrations
+- Air Quality Index (AQI)
+
+The merged dataset becomes the primary input for preprocessing, feature engineering, exploratory data analysis, and model training.
+
+---
+
+## Dataset Structure
+
+The merged dataset contains the following information:
+
+### Air Quality Variables
+
+- us_aqi
+- pm2_5
+- pm10
+- carbon_monoxide
+- nitrogen_dioxide
+- sulphur_dioxide
+- ozone
+
+### Weather Variables
+
+- temperature_2m
+- relative_humidity_2m
+- dew_point_2m
+- surface_pressure
+- wind_speed_10m
+- wind_direction_10m
+- precipitation
+- cloud_cover
+
+---
+
+# Data Validation
+
+Before the dataset is used for feature engineering, a comprehensive validation process is performed to verify its integrity and consistency.
+
+The validation stage helps identify missing observations, duplicate records, incorrect timestamps, and invalid values that could negatively affect downstream machine learning tasks.
+
+---
+
+## Validation Objectives
+
+The validation pipeline ensures that:
+
+- the dataset has been generated successfully
+- all expected columns are present
+- no duplicate observations exist
+- timestamps are valid and sorted
+- hourly observations are continuous
+- AQI values fall within reasonable ranges
+- numerical features are consistent
+
+---
+
+## Dataset Validation
+
+The validation process begins by inspecting the overall structure of the merged dataset.
+
+The following information is reported:
+
+- Dataset dimensions
+- Column names
+- Data types
+
+This confirms that the merged dataset has the expected schema before further processing.
+
+---
+
+## Missing Value Detection
+
+Each column is examined for missing values.
+
+If missing observations are found, the affected columns and their corresponding counts are reported.
+
+If no missing values exist, the validation process confirms that the dataset is complete.
+
+---
+
+## Duplicate Detection
+
+The validation pipeline checks for two types of duplicates.
+
+### Duplicate Rows
+
+Entire duplicated observations are identified.
+
+Duplicate rows may occur due to repeated API requests or accidental data insertion.
+
+---
+
+### Duplicate Timestamps
+
+The `datetime` column is examined for duplicate timestamps.
+
+Each timestamp should correspond to exactly one hourly observation.
+
+Duplicate timestamps indicate inconsistencies in the data collection process.
+
+---
+
+## Datetime Validation
+
+The datetime column is converted into a datetime object before performing several consistency checks.
+
+The validation process verifies:
+
+- earliest observation
+- latest observation
+- chronological ordering
+- timestamp uniqueness
+
+Maintaining a correctly ordered time series is essential for time-based feature engineering and forecasting.
+
+---
+
+## Time Continuity Check
+
+Since observations are collected hourly, consecutive timestamps should be separated by exactly one hour.
+
+The validation process compares:
+
+- Expected number of hourly observations
+- Actual number of observations
+
+If the two values differ, the validation report identifies the number of missing hourly records.
+
+This step ensures that the historical time series contains no unexpected gaps.
+
+---
+
+## Numerical Summary
+
+Descriptive statistics are generated for every numerical feature, including:
+
+- Mean
+- Standard deviation
+- Minimum
+- Maximum
+- Quartiles
+
+This provides an overview of the dataset distribution and helps identify abnormal values before model training.
+
+---
+
+## AQI Validation
+
+Because AQI is the target variable, additional sanity checks are performed.
+
+The validation process reports:
+
+- Minimum AQI
+- Maximum AQI
+
+It also checks for invalid negative AQI values, which would indicate corrupted or incorrect observations.
+
+---
+
+## Validation Workflow
+
+```text
+lahore_merged.csv
+         │
+         ▼
+ Dataset Structure Check
+         │
+         ▼
+ Missing Value Check
+         │
+         ▼
+ Duplicate Detection
+         │
+         ▼
+ Datetime Validation
+         │
+         ▼
+ Hourly Continuity Check
+         │
+         ▼
+ Numerical Summary
+         │
+         ▼
+ AQI Validation
+         │
+         ▼
+ Validated Dataset
+```
+
+---
+
+## Historical Data Pipeline Summary
+
+At the end of the historical data collection stage:
+
+- Historical weather observations have been collected.
+- Historical air quality observations have been collected.
+- Both datasets have been standardized into a common format.
+- Weather and pollution observations have been merged into a unified dataset.
+- The merged dataset has been validated for completeness, consistency, and quality.
+
+The validated dataset is now ready for the preprocessing and feature engineering stages.
+
+
+# Production Data Pipeline
+
+While the historical data collection pipeline is used to generate the initial training dataset, the project also includes an automated production data ingestion pipeline that continuously updates the dataset with newly available observations.
+
+Instead of downloading the complete historical dataset each time, the production pipeline performs **incremental data ingestion**, retrieving only records that have not yet been stored in the database.
+
+This approach significantly reduces API requests, minimizes processing time, prevents duplicate records, and keeps the dataset synchronized with the latest available weather and air quality observations.
+
+The production pipeline is implemented using **Supabase Edge Functions**, **Supabase PostgreSQL**, and **Supabase Cron Jobs**.
+
+---
+
+# Production Pipeline Architecture
+
+```text
+                    Every Hour
+                         │
+                         ▼
+              Supabase Cron Scheduler
+                         │
+        ┌────────────────┼────────────────┐
+        ▼                ▼                ▼
+ Fetch Weather     Fetch Pollution    Merge Data
+        │                │                │
+        ▼                ▼                ▼
+ raw_weather      raw_pollution      merged
+        └──────────────┬──────────────┘
+                       ▼
+          Updated Dataset Available
+```
+
+---
+
+# Database Tables
+
+The production pipeline stores data in three PostgreSQL tables.
+
+| Table | Description |
+|--------|-------------|
+| `raw_weather` | Stores hourly weather observations retrieved from the Open-Meteo Historical Weather API. |
+| `raw_pollution` | Stores hourly AQI and pollutant observations retrieved from the Open-Meteo Air Quality API. |
+| `merged` | Stores the merged weather and air quality dataset used by downstream preprocessing and feature engineering pipelines. |
+
+The raw tables preserve the original API responses, while the merged table provides a unified view of all observations.
+
+---
+
+# Incremental Weather Collection
+
+The weather ingestion pipeline is implemented as a Supabase Edge Function that executes automatically every hour.
+
+Unlike the historical collection process, this function downloads only observations that are not already present in the database.
+
+---
+
+## Workflow
+
+### Step 1 — Retrieve Latest Stored Timestamp
+
+The function begins by querying the `raw_weather` table to determine the most recent weather observation currently stored.
+
+If no data exists, the pipeline starts from the configured initial collection date.
+
+Otherwise, the next collection begins one hour after the latest stored observation.
+
+---
+
+### Step 2 — Determine Collection Window
+
+The current time is rounded down to the latest completed hour.
+
+This prevents partially available observations from being collected.
+
+The collection window therefore becomes:
+
+```text
+Latest Stored Timestamp + 1 Hour
+            │
+            ▼
+Latest Completed Hour
+```
+
+If no new hourly observations are available, the function exits without making an API request.
+
+---
+
+### Step 3 — Request New Weather Data
+
+The function requests only the missing time window from the Open-Meteo Historical Weather API.
+
+The same meteorological variables used during historical data collection are retrieved.
+
+Because only missing observations are requested, the amount of transferred data remains very small regardless of database size.
+
+---
+
+### Step 4 — Transform API Response
+
+Each API response is converted into the database schema.
+
+During this stage the function:
+
+- formats timestamps
+- converts API timestamps into PostgreSQL datetime format
+- prepares records for database insertion
+- ignores observations that already exist
+- ignores observations from future hours
+
+---
+
+### Step 5 — Insert New Records
+
+New weather observations are inserted into the `raw_weather` table using an **upsert** operation.
+
+The `datetime` column acts as the unique key.
+
+Using an upsert operation guarantees that repeated executions cannot create duplicate records.
+
+---
+
+# Incremental Air Quality Collection
+
+Air quality observations are collected using a second Supabase Edge Function.
+
+Its execution flow mirrors the weather pipeline while retrieving pollutant concentrations and AQI values from the Open-Meteo Air Quality API.
+
+---
+
+## Workflow
+
+### Step 1 — Retrieve Latest Pollution Timestamp
+
+The function queries the `raw_pollution` table to determine the most recently stored observation.
+
+---
+
+### Step 2 — Determine Missing Collection Window
+
+Only observations between the latest stored timestamp and the latest completed hour are requested.
+
+This avoids downloading historical observations multiple times.
+
+---
+
+### Step 3 — Request Air Quality Data
+
+The Open-Meteo Air Quality API is queried using the configured coordinates.
+
+Hourly observations include:
+
+- US AQI
+- PM2.5
+- PM10
+- Carbon Monoxide
+- Nitrogen Dioxide
+- Sulphur Dioxide
+- Ozone
+
+---
+
+### Step 4 — Transform API Response
+
+Before insertion, the pipeline:
+
+- converts timestamps into PostgreSQL format
+- rounds AQI values to integers
+- skips already stored observations
+- ignores future timestamps
+
+---
+
+### Step 5 — Insert New Records
+
+The processed observations are inserted into the `raw_pollution` table using an upsert operation on the `datetime` column.
+
+This ensures each hourly observation exists only once within the database.
+
+---
+
+# Incremental Data Merge
+
+After both raw datasets have been updated, a third Supabase Edge Function merges the newly collected observations.
+
+Unlike the historical merge, the production merge processes only records that have not previously been added to the merged dataset.
+
+This incremental approach allows the merge operation to remain efficient as the database grows over time.
+
+---
+
+## Merge Workflow
+
+### Step 1 — Retrieve Latest Merged Timestamp
+
+The function determines the newest observation currently stored in the `merged` table.
+
+This timestamp acts as the starting point for the incremental merge.
+
+---
+
+### Step 2 — Retrieve New Weather Records
+
+Only weather observations newer than the latest merged timestamp are retrieved.
+
+---
+
+### Step 3 — Retrieve New Pollution Records
+
+Only pollution observations newer than the latest merged timestamp are retrieved.
+
+---
+
+### Step 4 — Match Records
+
+Weather observations are indexed using their `datetime` values.
+
+Each pollution observation is matched with its corresponding weather observation using the shared timestamp.
+
+Only matching timestamps are merged.
+
+---
+
+### Step 5 — Build Unified Records
+
+Each merged observation contains:
+
+- timestamp
+- AQI
+- pollutant concentrations
+- weather measurements
+
+The resulting records have the same structure as the historical merged dataset.
+
+---
+
+### Step 6 — Update Database
+
+The merged observations are inserted into the `merged` table using an upsert operation.
+
+This ensures that only newly available observations are processed while preventing duplicate entries.
+
+---
+
+# Benefits of Incremental Data Collection
+
+Compared to repeatedly downloading the complete historical dataset, the production pipeline provides several advantages.
+
+- Only newly available observations are requested.
+- Duplicate records are automatically prevented.
+- API usage is significantly reduced.
+- Database updates complete within seconds.
+- Storage operations remain efficient as the dataset grows.
+- The merged dataset remains continuously synchronized with the latest available observations.
+
+This incremental architecture enables the project to maintain an up-to-date dataset suitable for continuous model retraining and real-time prediction.
+
+# Automated Scheduling
+
+To keep the dataset continuously synchronized with the latest available observations, the production data pipeline is fully automated using **Supabase Cron Jobs**.
+
+Each component of the ingestion pipeline executes independently as a scheduled task, allowing new observations to be collected, processed, and merged without manual intervention.
+
+Rather than downloading the complete historical dataset repeatedly, the scheduler executes incremental updates every hour.
+
+---
+
+# Cron Job Schedule
+
+The production pipeline consists of three scheduled jobs.
+
+| Cron Job | Schedule | Purpose |
+|----------|----------|---------|
+| `fetch-weather-hourly` | Every hour (10 minutes past the hour) | Downloads newly available weather observations and updates the `raw_weather` table. |
+| `fetch-pollution-hourly` | Every hour (10 minutes past the hour) | Downloads newly available air quality observations and updates the `raw_pollution` table. |
+| `merge-hourly` | Every hour (15 minutes past the hour) | Merges newly collected weather and pollution records into the `merged` table. |
+
+The merge operation is intentionally scheduled after both collection jobs to ensure that the latest weather and pollution observations are available before merging.
+
+---
+
+# Automated Workflow
+
+Each hour, the production pipeline performs the following sequence of operations.
+
+### Step 1 — Weather Collection
+
+The weather Edge Function:
+
+- retrieves the latest timestamp stored in the `raw_weather` table
+- requests only newly available observations from the Open-Meteo Historical Weather API
+- skips duplicate and future observations
+- upserts new records into the database
+
+---
+
+### Step 2 — Air Quality Collection
+
+The air quality Edge Function:
+
+- retrieves the latest timestamp stored in the `raw_pollution` table
+- requests only newly available AQI observations
+- converts AQI values to integer format
+- upserts new records into the database
+
+---
+
+### Step 3 — Dataset Merge
+
+After both raw datasets have been updated:
+
+- newly collected weather observations are retrieved
+- newly collected pollution observations are retrieved
+- records are matched using their common `datetime`
+- merged observations are inserted into the `merged` table
+
+Only observations that have not previously been merged are processed.
+
+---
+
+# End-to-End Data Pipeline
+
+```text
+                     Historical Data Collection
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Open-Meteo Weather API        Open-Meteo Air Quality API   │
+│           │                              │                  │
+│           ▼                              ▼                  │
+│   lahore_weather.csv          lahore_pollution.csv          │
+│           └──────────────┬───────────────┘                  │
+│                          ▼                                  │
+│               Merge on datetime                             │
+│                          ▼                                  │
+│              lahore_merged.csv                              │
+│                          ▼                                  │
+│                 Dataset Validation                          │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                           ▼
+                 Feature Engineering
+                           │
+                           ▼
+               Production Data Pipeline
+                           │
+                           ▼
+               Supabase Cron Scheduler
+                           │
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+ Fetch Weather      Fetch Pollution      Merge Records
+        │                  │                  │
+        ▼                  ▼                  ▼
+ raw_weather       raw_pollution         merged
+                           │
+                           ▼
+              Updated Dataset Available
+```
+
+---
+
+# Generated Datasets
+
+The historical data collection stage produces the following datasets.
+
+```text
+data/
+├── raw/
+│   ├── lahore_weather.csv
+│   └── lahore_pollution.csv
+│
+└── interim/
+    └── lahore_merged.csv
+```
+
+---
+
+# Production Database Tables
+
+The automated production pipeline maintains the following PostgreSQL tables inside Supabase.
+
+```text
+Supabase
+│
+├── raw_weather
+│      └── Hourly weather observations
+│
+├── raw_pollution
+│      └── Hourly air quality observations
+│
+└── merged
+       └── Combined weather + pollution dataset
+```
+
+---
+
+# Design Decisions
+
+Several design choices were made to improve the scalability and reliability of the data pipeline.
+
+## Historical and Production Pipelines
+
+The project separates historical data collection from production updates.
+
+The historical pipeline downloads the complete dataset once for model development, while the production pipeline performs lightweight incremental updates.
+
+This avoids unnecessary API requests and reduces execution time.
+
+---
+
+## Incremental Updates
+
+Rather than replacing existing datasets, the production pipeline retrieves only observations that are newer than the latest stored timestamp.
+
+This minimizes bandwidth usage, reduces computational overhead, and enables efficient long-term operation.
+
+---
+
+## Upsert Operations
+
+All database insertions use PostgreSQL upsert operations with the `datetime` column as the conflict key.
+
+This guarantees that duplicate observations cannot be created, even if an Edge Function executes multiple times.
+
+---
+
+## Modular Edge Functions
+
+Weather collection, air quality collection, and dataset merging are implemented as independent Edge Functions.
+
+This modular design simplifies maintenance, debugging, and future extensions while allowing each stage to operate independently.
+
+---
+
+## Automated Scheduling
+
+The use of Supabase Cron Jobs enables the entire ingestion process to run automatically without manual intervention.
+
+The production dataset remains continuously synchronized with the latest available observations, ensuring that downstream preprocessing, feature engineering, model retraining, and inference always operate on up-to-date data.
+
+---
+
+# Summary
+
+The data collection stage establishes the foundation of the AQI prediction pipeline.
+
+The pipeline begins by generating a complete historical dataset from the Open-Meteo APIs, which is merged and validated before being used for model development.
+
+Once the historical dataset has been created, the project transitions to an automated production workflow powered by Supabase Edge Functions and scheduled Cron Jobs. New weather and air quality observations are collected incrementally, merged into a unified dataset, and stored in PostgreSQL without introducing duplicate records.
+
+This architecture provides a scalable and production-oriented data ingestion system capable of supporting continuous feature engineering, model retraining, and real-time AQI prediction.
