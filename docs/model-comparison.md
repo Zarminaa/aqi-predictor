@@ -151,7 +151,9 @@ A fully connected deep neural network was also implemented to evaluate deep lear
 | **XGBoost** | **22.540** | **30.990** | **0.636** | **22.310** | **30.580** | **0.643** |
 | PyTorch Neural Network | 24.977 | 33.842 | 0.405 | 22.343 | 32.295 | 0.356 |
 
-> **Insert Screenshot:** Overall Evaluation Metrics
+
+<img width="1491" height="661" alt="image" src="https://github.com/user-attachments/assets/fbaf5f06-2dc4-4831-b760-62a4714b3640" />
+
 
 ---
 
@@ -164,7 +166,7 @@ A fully connected deep neural network was also implemented to evaluate deep lear
 | **XGBoost** | **16.100** | **22.460** | **0.803** | **15.980** | **22.170** | **0.810** |
 | PyTorch | 17.578 | 23.311 | 0.720 | 17.190 | 25.930 | 0.586 |
 
-> **Insert Screenshot:** Day 1 Evaluation Results
+
 
 ---
 
@@ -177,7 +179,7 @@ A fully connected deep neural network was also implemented to evaluate deep lear
 | **XGBoost** | **24.120** | **32.760** | **0.592** | **23.930** | **32.210** | **0.600** |
 | PyTorch | 27.038 | 35.336 | 0.352 | 23.548 | 33.216 | 0.319 |
 
-> **Insert Screenshot:** Day 2 Evaluation Results
+
 
 ---
 
@@ -190,7 +192,7 @@ A fully connected deep neural network was also implemented to evaluate deep lear
 | **XGBoost** | **27.410** | **35.810** | **0.513** | **27.030** | **35.340** | **0.519** |
 | PyTorch | 30.316 | 40.544 | 0.144 | 26.293 | 36.787 | 0.163 |
 
-> **Insert Screenshot:** Day 3 Evaluation Results
+
 
 ---
 
