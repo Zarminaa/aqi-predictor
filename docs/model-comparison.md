@@ -31,9 +31,7 @@ Mean Absolute Error measures the average magnitude of prediction errors without 
 
 Lower MAE values indicate more accurate predictions.
 
-\[
-MAE=\frac{1}{n}\sum |y_i-\hat{y_i}|
-\]
+
 
 ---
 
@@ -43,9 +41,7 @@ Root Mean Squared Error penalizes larger prediction errors more heavily than MAE
 
 Lower RMSE values indicate better predictive performance.
 
-\[
-RMSE=\sqrt{\frac{1}{n}\sum(y_i-\hat{y_i})^2}
-\]
+
 
 ---
 
@@ -55,9 +51,7 @@ R² measures how much variance in the target variable is explained by the model.
 
 Values closer to 1 indicate better predictive performance.
 
-\[
-R^2=1-\frac{\sum(y-\hat y)^2}{\sum(y-\bar y)^2}
-\]
+
 
 ---
 
