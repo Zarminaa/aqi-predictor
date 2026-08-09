@@ -151,6 +151,7 @@ A fully connected deep neural network was also implemented to evaluate deep lear
 | **XGBoost** | **22.540** | **30.990** | **0.636** | **22.310** | **30.580** | **0.643** |
 | PyTorch Neural Network | 24.977 | 33.842 | 0.405 | 22.343 | 32.295 | 0.356 |
 
+<img width="1503" height="702" alt="image" src="https://github.com/user-attachments/assets/460245c1-f58d-4c6d-850d-304cc8e6825a" />
 
 <img width="1491" height="661" alt="image" src="https://github.com/user-attachments/assets/fbaf5f06-2dc4-4831-b760-62a4714b3640" />
 
