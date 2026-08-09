@@ -19,6 +19,8 @@ An industry-inspired Machine Learning Operations (MLOps) project that automates 
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![MLflow](https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge)
 ![Hopsworks](https://img.shields.io/badge/Hopsworks-Feature%20Store-orange?style=for-the-badge)
+![SHAP](https://img.shields.io/badge/SHAP-FF6F00?style=for-the-badge)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
