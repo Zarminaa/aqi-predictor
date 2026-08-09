@@ -546,6 +546,49 @@ This timestamp is then written back to the `pipeline_state` table in Supabase.
 Updating the checkpoint marks all processed observations as complete, ensuring that the next pipeline execution begins processing only from the first unseen observation.
 
 ---
+# Automated Feature Update Pipeline
+
+## Overview
+
+To keep the Feature Store synchronized with newly collected weather and air quality observations, the project automates the feature engineering process using GitHub Actions.
+
+Rather than requiring manual execution, the feature update pipeline runs on a scheduled basis, ensuring that newly available data is transformed into engineered features and uploaded to the Hopsworks Feature Store without user intervention.
+
+This automation enables the feature repository to remain up to date while reducing operational overhead and supporting continuous model retraining.
+
+---
+
+## Pipeline Workflow
+
+Each scheduled execution performs the following steps:
+
+1. Retrieve the latest merged dataset from Supabase.
+2. Read the timestamp of the last processed record from the `pipeline_state` table.
+3. Generate engineered features using the feature engineering pipeline.
+4. Identify newly generated feature records that have not previously been processed.
+5. Validate feature data types against the Hopsworks Feature Group schema.
+6. Insert the new features into the Feature Group.
+7. Update the processing checkpoint in Supabase.
+
+This workflow ensures that only newly available observations are processed during each execution, preventing duplicate feature generation and minimizing unnecessary computation.
+
+---
+
+## GitHub Actions Automation
+
+The feature update pipeline is executed automatically through a scheduled GitHub Actions workflow.
+
+The workflow provisions the execution environment, installs the project dependencies, loads the required environment variables, and runs the feature update pipeline script.
+
+Automating this process provides several advantages:
+
+- Eliminates manual execution of the feature pipeline.
+- Ensures newly collected data is regularly engineered.
+- Keeps the Hopsworks Feature Store synchronized with the latest observations.
+- Enables downstream training pipelines to use up-to-date features.
+- Supports a reproducible and fully automated MLOps workflow.
+
+By integrating feature engineering with GitHub Actions, the project establishes a continuous feature pipeline in which newly collected data is transformed, validated, and stored automatically, maintaining a consistent and production-ready feature repository.
 
 # Chronological Dataset Splitting
 
