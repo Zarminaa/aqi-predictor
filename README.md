@@ -192,44 +192,6 @@ Interactive Streamlit dashboard featuring:
 
 ---
 
-# End-to-End Workflow
-
-```
-Weather API
-      │
-      ▼
-Pollution API
-      │
-      ▼
-Data Ingestion
-      │
-      ▼
-Data Validation
-      │
-      ▼
-Feature Engineering
-      │
-      ▼
-Feature Store
-      │
-      ▼
-Model Training
-      │
-      ▼
-Model Evaluation
-      │
-      ▼
-MLflow Tracking
-      │
-      ▼
-Best Model
-      │
-      ▼
-Streamlit Dashboard
-```
-
----
-
 # 🛠️ Technology Stack
 
 | Category | Technologies |
