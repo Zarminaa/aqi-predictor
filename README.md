@@ -566,6 +566,50 @@ git commit -m "Add new feature"
 git push origin feature/your-feature-name
 ```
 
+## Running Modules
+
+All project modules should be executed **from the project root directory** using Python's module execution syntax.
+
+This ensures that:
+
+- Relative and absolute imports are resolved correctly.
+- The project package structure remains intact.
+- Configuration files and environment variables are loaded correctly.
+- Execution is consistent across operating systems.
+
+### General Format
+
+```bash
+python -m package.subpackage.module_name
+```
+
+For example:
+
+```bash
+python -m src.pipelines.test.training_pipeline
+```
+
+instead of
+
+```bash
+python src/hopsworks/test.py
+```
+
+Running scripts directly using file paths may result in import errors such as:
+
+```text
+ModuleNotFoundError: No module named 'src'
+```
+
+Always execute commands from the repository's root directory.
+
+From the project root:
+
+```bash
+cd aqi-predictor
+python -m src.hopsworks.test
+```
+
 5. Open a Pull Request.
 
 Please ensure that your code follows the project's style guidelines and includes appropriate documentation where necessary.
