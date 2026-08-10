@@ -1,5 +1,10 @@
 # Dashboard
 
+## Live Demo
+
+**Interactive Dashboard:**  
+[https://my-streamlit-app.streamlit.app](https://lahore-cantonment-aqi-predictor.streamlit.app/)
+
 ## Overview
 
 The dashboard serves as the primary user interface for the AQI Prediction System, providing real-time monitoring of environmental conditions and machine learning-based forecasts for the next three days in **Lahore Cantonment**. It combines live air quality measurements, weather observations, predictive analytics, historical trends, model explainability, and evaluation metrics into a single interactive application.
